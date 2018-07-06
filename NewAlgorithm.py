@@ -7,9 +7,10 @@ from sklearn.datasets import load_files
 import re
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer,TfidfVectorizer
 
-#全局变量
-weakClassArr = []  #用于存储每次训练得到的弱分类器
-weightArr = []  #弱分类器的权重
+
+weakClassArr = []  # 全局变量，用于存储每次训练得到的弱分类器
+classifierWeightArr = []  #弱分类器的权重
+#instanceWeightArr = []  #样本的权重
 entropy = [] #熵
 dataArr = [] #U集，即全部数据
 classLabels = [] #全部数据的标签
@@ -74,13 +75,22 @@ def computeQx(dataArr):
     return entropy
 
 #计算弱分类器权重
-def computeWeight(h_t, simpleDataArr):
+def computeWeight(h_t, enlargedLArr, enlargedLabelArr):
     """
     :param h_t: 当前弱分类器
-    :param simpleDataArr: 采样并标记的数据
+    :param enlargedLArr: 增大了的数据集L
+    :param enlargedLabelArr: 增大了的数据集L的标签
     :return: 弱分类器权重
     """
-    return weight #返回改弱分类器的权重
+    err = 0
+    m = shape(enlargedLArr)[0]
+    #instanceWeightArr = ones((m, 1)) / m  # 数据集L权重初始化为1/m
+    for index, x in enumerate(enlargedLArr) :
+        if enlargedLabelArr[index] != h_t.predict(x):
+            err = err + instanceWeightArr[index]
+
+    weight = math.log((1.0-err)/err)
+    return weight #返回该弱分类器的权重
 
 #数据预处理
 def preTreatment():
