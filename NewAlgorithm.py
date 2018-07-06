@@ -82,18 +82,13 @@ def preTreatment():
     # 使用tf-idf方法提取文本特征
     tf = TfidfVectorizer(min_df=1, analyzer='word', stop_words='english', strip_accents='ascii')
     X_train_tfidf = tf.fit_transform(data)
-    feature_names = tf.get_feature_names()
-    # 打印特征矩阵规格
-    print(type(X_train_tfidf))
-    print(X_train_tfidf.shape)
-    print(feature_names)
-    print(X_train_tfidf[0])
-    return array #添加return
+    # feature_names = tf.get_feature_names()
+    return X_train_tfidf, train_data.target
 
 
-if _name_ == '_main_':
+if __name__ == '_main_':
     #初始化，随机采样训练h_1
-    dataArr  #所有数据的数组
+    dataArr, labelArr = preTreatment()  #所有数据的数组
     ranDataArr, ranLabelArr = randomSamples(dataArr, labelArr)  #随机抽取样本
     clf = tree.DecisionTreeClassifier()
     h_1 = clf.fit(ranDataArr, ranLabelArr)
