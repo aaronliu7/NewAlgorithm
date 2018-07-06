@@ -8,7 +8,8 @@ import re
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer,TfidfVectorizer
 
 
-weakClassArr = []  # 全局变量，用于存储每次训练得到的弱分类器以及其输出结果的权重
+weakClassArr = []  # 全局变量，用于存储每次训练得到的弱分类器
+weightArr = []  #弱分类器的权重
 entropy = [] #熵
 #自适应数据加载函数
 def loadDataSet(fileName):
@@ -50,7 +51,7 @@ def randomSamples(dataArr, labelArr):
 #根据q(x)采样和标记样本
 def sampleBasedQx(dataArr, entropy):
     #simple and label k instances from U
-    return k instances
+    return k_instances
 
 
 #计算q(x)
@@ -60,6 +61,15 @@ def computeQx(dataArr):
         #计算熵
         entropy[index] = -prediction[0][0]*math.log(prediction[0][0])-prediction[0][1]*math.log(prediction[0][1])
     return entropy
+
+#计算弱分类器权重
+def computeWeight(h_t, simpleDataArr):
+    """
+    :param h_t: 当前弱分类器
+    :param simpleDataArr: 采样并标记的数据
+    :return: 弱分类器权重
+    """
+    return weight #返回改弱分类器的权重
 
 #数据预处理
 def preTreatment():
