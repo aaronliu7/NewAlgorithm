@@ -88,6 +88,7 @@ def preTreatment():
 
 if __name__ == '_main_':
     #初始化，随机采样训练h_1
+
     dataArr, labelArr = preTreatment()  #所有数据的数组
     ranDataArr, ranLabelArr = randomSamples(dataArr, labelArr)  #随机抽取样本
     clf = tree.DecisionTreeClassifier()
