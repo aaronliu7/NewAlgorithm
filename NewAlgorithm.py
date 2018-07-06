@@ -7,10 +7,15 @@ from sklearn.datasets import load_files
 import re
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer,TfidfVectorizer
 
-
-weakClassArr = []  # 全局变量，用于存储每次训练得到的弱分类器
+#全局变量
+weakClassArr = []  #用于存储每次训练得到的弱分类器
 weightArr = []  #弱分类器的权重
 entropy = [] #熵
+dataArr = [] #U集，即全部数据
+classLabels = [] #全部数据的标签
+lArr = [] #L集
+classLabelsOfL = [] #L集的标签
+
 #自适应数据加载函数
 def loadDataSet(fileName):
     numFeat = len(open(fileName).readline().split('\t'))
@@ -49,7 +54,13 @@ def randomSamples(dataArr, labelArr):
     return ranDataArr, ranLabelArr
 
 #根据q(x)采样和标记样本
-def sampleBasedQx(dataArr, entropy):
+def sampleBasedQx(dataArr, entropy, numSample):
+    """
+    :param dataArr: U集数组
+    :param entropy: U集中x的熵
+    :param numSample: 采样数量
+    :return:
+    """
     #simple and label k instances from U
     return k_instances
 
