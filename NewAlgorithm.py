@@ -88,6 +88,7 @@ def preTreatment():
     print(X_train_tfidf.shape)
     print(feature_names)
     print(X_train_tfidf[0])
+    return array
 
 
 
