@@ -69,7 +69,7 @@ def computeWeight(h_t, simpleDataArr):
     :param simpleDataArr: 采样并标记的数据
     :return: 弱分类器权重
     """
-    return weightOfClassfier #返回改弱分类器的权重
+    return weight #返回改弱分类器的权重
 
 #数据预处理
 def preTreatment():
