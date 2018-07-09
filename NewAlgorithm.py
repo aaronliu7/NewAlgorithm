@@ -75,12 +75,13 @@ def computeQx(dataArr):
     return entropy
 
 #计算弱分类器权重
-def computeWeight(h_t, enlargedLArr, enlargedLabelArr, instanceWeightArr):
+def computeWeight(h_t, enlargedLArr, enlargedLabelArr, instanceWeightArr, Qx):
     """
     :param h_t: 当前弱分类器
     :param enlargedLArr: 增大了的数据集L
     :param enlargedLabelArr: 增大了的数据集L的标签
-    :param instanceWeightArr: 当前轮的L集合的样本权重
+    :param instanceWeightArr: 当前已有的L集合的样本权重
+    :param Qx: entropy of H_{t-1}(x)，Qx这里针对于整个enlargedLArr，Qx是个数组
     :return: 弱分类器权重
     """
     err = 0
@@ -90,7 +91,7 @@ def computeWeight(h_t, enlargedLArr, enlargedLabelArr, instanceWeightArr):
     #instanceWeightArr = ones((m, 1)) / m  # 数据集L权重初始化为1/m
     for index, x in enumerate(enlargedLArr) :
         if enlargedLabelArr[index] != h_t.predict(x):
-            err = err + instanceWeightArr[index]#这里要使enlargedLArr和instanceWeightArr一样大才可以
+            err = err + instanceWeightArr[index] * Qx[index] #这里要使enlargedLArr和instanceWeightArr一样大才可以
 
     weight = math.log((1.0-err)/err)
     return weight #返回该弱分类器的权重
