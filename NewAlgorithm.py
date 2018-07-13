@@ -21,7 +21,7 @@ def newAlgorithmTrain(Unlabel_list, weakClassArr, classifierWeightArr, numIt=40)
         #find the weight for h_t
         Unlabel_list = computeInstanceWeight(Unlabel_list, weakClassArr, classifierWeightArr) #计算样本权重
 
-        sampleBasedQx(dataArr,entropy) #simple and label k instances from U
+        sampleBasedQx(dataArr,) #simple and label k instances from U
 
         classifierWeightArr[t] = computeWeight()#evaluate h_t using importance sampling...
 
