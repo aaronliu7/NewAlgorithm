@@ -5,7 +5,7 @@ from numpy import *
 import math
 from sklearn.datasets import load_files
 import re
-from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer,TfidfVectorizer
+from sklearn.feature_extraction.text import TfidfVectorizer
 
 
 weakClassArr = []  # 全局变量，用于存储每次训练得到的弱分类器
@@ -17,19 +17,6 @@ classLabels = [] #全部数据的标签
 lArr = [] #L集
 classLabelsOfL = [] #L集的标签
 
-#自适应数据加载函数
-def loadDataSet(fileName):
-    numFeat = len(open(fileName).readline().split('\t'))
-    dataMat = []
-    labelMat = []
-    for line in open(fileName).readlines():
-        lineArr = []
-        curLine = line.strip().split('\t')
-        for i in range(numFeat-1):  #最后一项为label
-            lineArr.append(float(curLine[i]))
-        dataMat.append(lineArr)
-        labelMat.append(float(curLine[-1]))
-    return dataMat, labelMat
 
 # new algorithm
 def newAlgorithmTrain(dataArr, classLabels,numIt=40):
@@ -53,27 +40,51 @@ def newAlgorithmTrain(dataArr, classLabels,numIt=40):
 
 #随机抽取样本  dataArr为所有样本数组
 def randomSamples(dataArr, labelArr):
+    """
+    :param dataArr:
+    :param labelArr:
+    :return:
+    """
     #将抽取的样本从U集中删除，添加进L集中
     len = labelArr.len()
     indexList = range(len)
     randomIndex = random.sample(indexList,10)
-    for i in randomIndex:
+    for i in enumerate(randomIndex):
         ranDataArr.apppend(dataArr[i])
-        ranDataArr.apppend(labelArr)
+        ranLabelArr.apppend(labelArr[i])
+
+    # LArr = list(set(dataArr).difference(set(ranDataArr)))
+
     return ranDataArr, ranLabelArr
 
 #根据q(x)采样和标记样本
-def sampleBasedQx(dataArr, entropy, numSample):
+def sampleBasedQx(dataArr, entropy, labelArr,  numSample):
     """
     :param dataArr: U集数组
     :param entropy: U集中x的熵
+    :param labelArr: 标签
     :param numSample: 采样数量
     :return:
     """
     #simple and label k instances from U
     #将抽取的样本从U集中删除，添加进L集中
-    return k_instances
+    total = sum(entropy)  # 权重求和
+    ra = []
+    for i in range(numSample):
+        ra.append(random.uniform(0, total))  # 在0与权重和之前获取一个随机数
 
+    curr_sum = 0
+    ret = None
+    keys = dataArr.keys()
+
+    for rw in ra:
+        for k in keys:
+            curr_sum += entropy[k]  # 在遍历中，累加当前权重值
+            if rw <= curr_sum:  # 当随机数<=当前权重和时，返回权重key
+                ret.append(k)
+                break
+
+    return k_instances
 
 #计算q(x)
 def computeQx(dataArr):
@@ -141,7 +152,6 @@ def preTreatment():
     X_train_tfidf = tf.fit_transform(data)
     # feature_names = tf.get_feature_names()
     return X_train_tfidf, train_data.target
-
 
 if __name__ == '_main_':
     #初始化，随机采样训练h_1
