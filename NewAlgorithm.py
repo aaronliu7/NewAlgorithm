@@ -40,7 +40,7 @@ def newAlgorithmTrain(dataArr, classLabels,numIt=40):
 
         sampleBasedQx(dataArr,entropy) #simple and label k instances from U
 
-        #evaluate h_t using importance sampling...
+        computeWeight(h_t, )#evaluate h_t using importance sampling...
 
         #let w_t be the weight of h_t
 
@@ -49,9 +49,11 @@ def newAlgorithmTrain(dataArr, classLabels,numIt=40):
         #train the next weak classifier
         #add the sample to L
         #train the next weak classifier h_{t+1} using the enlarged L and go to {*}
+        trainNextClf(lArr, classLabelsOfL, t)
 
 #随机抽取样本  dataArr为所有样本数组
 def randomSamples(dataArr, labelArr):
+    #将抽取的样本从U集中删除，添加进L集中
     len = labelArr.len()
     indexList = range(len)
     randomIndex = random.sample(indexList,10)
@@ -69,6 +71,7 @@ def sampleBasedQx(dataArr, entropy, numSample):
     :return:
     """
     #simple and label k instances from U
+    #将抽取的样本从U集中删除，添加进L集中
     return k_instances
 
 
@@ -101,6 +104,19 @@ def computeWeight(h_t, sampleArr, sampleLabelArr, instanceWeightArr, Qx):
 
     weight = math.log((1.0-err)/err)
     return weight #返回该弱分类器的权重
+
+#训练下一个弱分类器
+def trainNextClf(lArr, classLabelsOfL, t):
+    '''
+
+    :param lArr: enlarged L集
+    :param classLabelsOfL: enlarged L集标签
+    :param t: 当前轮
+    :return: 新的弱分类器h_{t+1}
+    '''
+    clf = tree.DecisionTreeClassifier()
+    h_next = clf.fit(lArr, classLabelsOfL)
+    weakClassArr[t+1] = h_next
 
 #数据预处理
 def preTreatment():
