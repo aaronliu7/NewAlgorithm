@@ -6,16 +6,12 @@ import math
 from sklearn.datasets import load_files
 import re
 from sklearn.feature_extraction.text import TfidfVectorizer
-
+from Instance import Instance
 
 weakClassArr = []  # 全局变量，用于存储每次训练得到的弱分类器
 classifierWeightArr = []  #弱分类器的权重
-instanceWeightArr = []  #样本的权重
-entropy = [] #熵
-dataArr = [] #U集，即全部数据
-classLabels = [] #全部数据的标签
-lArr = [] #L集
-classLabelsOfL = [] #L集的标签
+Unlabel_list = [] #U集，即全部数据
+Label_list = [] #L集
 
 
 # new algorithm
@@ -39,23 +35,23 @@ def newAlgorithmTrain(dataArr, classLabels,numIt=40):
         trainNextClf(lArr, classLabelsOfL, t)
 
 #随机抽取样本  dataArr为所有样本数组
-def randomSamples(dataArr, labelArr):
+def randomSamples(datalist):
     """
-    :param dataArr:
-    :param labelArr:
+
+    :param datalist: 数据及其标签
     :return:
     """
-    #将抽取的样本从U集中删除，添加进L集中
-    len = labelArr.len()
+    len = datalist.len()
     indexList = range(len)
-    randomIndex = random.sample(indexList,10)
-    for i in enumerate(randomIndex):
-        ranDataArr.apppend(dataArr[i])
-        ranLabelArr.apppend(labelArr[i])
+    randomIndex = random.sample(indexList, 10)
+    sample_ins_list = []
+    for i in range(randomIndex):
+        sample_ins_list.append(datalist[i])
 
+    #将抽取的样本从U集中删除，添加进L集中
     # LArr = list(set(dataArr).difference(set(ranDataArr)))
 
-    return ranDataArr, ranLabelArr
+    return sample_ins_list
 
 #根据q(x)采样和标记样本
 def sampleBasedQx(dataArr, entropy, labelArr,  numSample):
@@ -84,15 +80,16 @@ def sampleBasedQx(dataArr, entropy, labelArr,  numSample):
                 ret.append(k)
                 break
 
+    #TODO 更新数据集
     return k_instances
 
 #计算q(x)
-def computeQx(dataArr):
-    for index, item in enumerate(dataArr):
-        prediction = H_{t-1}.predict_proba(item)  #x分类正负类的概率 prediction为[[0., 1.]]
-        #计算熵
-        entropy[index] = -prediction[0][0]*math.log(prediction[0][0])-prediction[0][1]*math.log(prediction[0][1])
-    return entropy
+# def computeQx(dataArr):
+#     for index, item in enumerate(dataArr):
+#         prediction = H_{t-1}.predict_proba(item)  #x分类正负类的概率 prediction为[[0., 1.]]
+#         #计算熵
+#         entropy[index] = -prediction[0][0]*math.log(prediction[0][0])-prediction[0][1]*math.log(prediction[0][1])
+#     return entropy
 
 #计算弱分类器权重
 def computeWeight(h_t, sampleArr, sampleLabelArr, instanceWeightArr, Qx):
@@ -107,7 +104,7 @@ def computeWeight(h_t, sampleArr, sampleLabelArr, instanceWeightArr, Qx):
     err = 0
     m = shape(sampleArr)[0]
     if m != shape(sampleLabelArr[0]) :
-        print "Array size mismatch"
+        print ("Array size mismatch")
     #instanceWeightArr = ones((m, 1)) / m  # 数据集L权重初始化为1/m
     for index, x in enumerate(sampleArr) :
         if sampleLabelArr[index] != h_t.predict(x):
@@ -153,11 +150,22 @@ def preTreatment():
     # feature_names = tf.get_feature_names()
     return X_train_tfidf, train_data.target
 
-if __name__ == '_main_':
-    #初始化，随机采样训练h_1
+if __name__ == '__main__':
+    """
+    预处理 返回的样本数据和标签存储在数据结构Instance中
+    每一行的数据格式为稀疏矩阵
+    标签是一个列表
+    """
 
-    dataArr, labelArr = preTreatment()  #所有数据的数组
-    ranDataArr, ranLabelArr = randomSamples(dataArr, labelArr)  #随机抽取样本
+    datalist = []
+    dataArr, labelArr = preTreatment()  #所有数据 以及标签
+
+    for i in range(len(labelArr)):
+        ins = Instance(dataArr[i], labelArr[i])
+        datalist.append(ins)
+
+    ini_ins_list = randomSamples(datalist)  #初始随机抽取样本
+
     clf = tree.DecisionTreeClassifier()
     h_1 = clf.fit(ranDataArr, ranLabelArr)
     weakClassArr[0] = h_1
