@@ -8,22 +8,22 @@ import re
 from sklearn.feature_extraction.text import TfidfVectorizer
 from Instance import Instance
 
-weakClassArr = []  # 全局变量，用于存储每次训练得到的弱分类器
-classifierWeightArr = []  #弱分类器的权重
-Unlabel_list = [] #U集，即全部数据
-Label_list = [] #L集
-
 
 # new algorithm
-def newAlgorithmTrain(dataArr, classLabels,numIt=40):
+def newAlgorithmTrain(Unlabel_list, weakClassArr, classifierWeightArr, numIt=40):
+    '''
+    :param Unlabel_list: 全部数据
+    :param numIt: 轮数
+    :return: H_T
+    '''
     #T轮训练
     for t in range(numIt):
         #find the weight for h_t
-        entropy = computeQx(dataArr) #得到U中每个x的熵
+        Unlabel_list = computeInstanceWeight(Unlabel_list, weakClassArr, classifierWeightArr) #计算样本权重
 
         sampleBasedQx(dataArr,entropy) #simple and label k instances from U
 
-        computeWeight(h_t, )#evaluate h_t using importance sampling...
+        classifierWeightArr[t] = computeWeight()#evaluate h_t using importance sampling...
 
         #let w_t be the weight of h_t
 
@@ -32,7 +32,7 @@ def newAlgorithmTrain(dataArr, classLabels,numIt=40):
         #train the next weak classifier
         #add the sample to L
         #train the next weak classifier h_{t+1} using the enlarged L and go to {*}
-        trainNextClf(lArr, classLabelsOfL, t)
+        weakClassArr[t+1] = trainNextClf(Label_list)
 
 #随机抽取样本  dataArr为所有样本数组
 def randomSamples(datalist):
@@ -83,13 +83,40 @@ def sampleBasedQx(dataArr, entropy, labelArr,  numSample):
     #TODO 更新数据集
     return k_instances
 
-#计算q(x)
-# def computeQx(dataArr):
-#     for index, item in enumerate(dataArr):
-#         prediction = H_{t-1}.predict_proba(item)  #x分类正负类的概率 prediction为[[0., 1.]]
-#         #计算熵
-#         entropy[index] = -prediction[0][0]*math.log(prediction[0][0])-prediction[0][1]*math.log(prediction[0][1])
-#     return entropy
+# 计算样本权重
+def computeInstanceWeight(Unlabel_list, weakClassArr, classifierWeightArr):
+    weightOfAll = 0 #所有样本的权重，用于归一化
+    for index, instance in enumerate(Unlabel_list):
+        probaOf0, probaOf1 = generateHt_1x(instance,weakClassArr, classifierWeightArr)  #H_{t-1}(x)
+        #计算熵
+        instance.weight = -probaOf0*math.log(probaOf0)-probaOf1*math.log(probaOf1)
+        weightOfAll += instance.weight
+    #归一化
+    for instance in Unlabel_list:
+        instance.weight = instance.weight/weightOfAll
+
+    return Unlabel_list
+
+#Generate H_{t-1}(x) for each x in U
+def generateHt_1x(instance, weakClassArr, classifierWeightArr):
+    '''
+    :param instance: 样本x
+    :param weakClassArr: 弱分类器数组
+    :param classifierWeightArr: 弱分类器权重
+    :return: probaOf0, probaOf1 H_{t-1}(x)预测为正类和负类的概率
+    '''
+
+    probaOf0 = 0
+    probaOf1 = 0
+
+    if len(weakClassArr) != len(classifierWeightArr):
+        print('!!!!!!!!!!弱分类器个数与其权重个数不对应!!!!!!!!!!!!!')
+    else:
+        for i in range(len(weakClassArr)):
+            prediction = weakClassArr[i].predict_proba(instance) #x分类正负类的概率 prediction为[[0., 1.]]
+            probaOf0 += prediction[0][0]*classifierWeightArr[i]
+            probaOf1 += prediction[0][1]*classifierWeightArr[i]
+        return probaOf0, probaOf1
 
 #计算弱分类器权重
 def computeWeight(h_t, sampleArr, sampleLabelArr, instanceWeightArr, Qx):
@@ -114,7 +141,7 @@ def computeWeight(h_t, sampleArr, sampleLabelArr, instanceWeightArr, Qx):
     return weight #返回该弱分类器的权重
 
 #训练下一个弱分类器
-def trainNextClf(lArr, classLabelsOfL, t):
+def trainNextClf(lArr, classLabelsOfL):
     '''
 
     :param lArr: enlarged L集
@@ -124,7 +151,7 @@ def trainNextClf(lArr, classLabelsOfL, t):
     '''
     clf = tree.DecisionTreeClassifier()
     h_next = clf.fit(lArr, classLabelsOfL)
-    weakClassArr[t+1] = h_next
+    return h_next
 
 #数据预处理
 def preTreatment():
@@ -150,7 +177,22 @@ def preTreatment():
     # feature_names = tf.get_feature_names()
     return X_train_tfidf, train_data.target
 
+#根据instance对象列表分成数据列表和标记列表
+def generateTrainArr(instanceArr):
+    tempDataArr = []
+    tempLabelArr = []
+    for instance in instanceArr:
+        tempDataArr.append(instance.data)
+        tempLabelArr.append(instance.label)
+    return tempDataArr, tempLabelArr
+
 if __name__ == '__main__':
+
+    weakClassArr = []  # 用于存储每次训练得到的弱分类器
+    classifierWeightArr = []  # 弱分类器的权重
+    Unlabel_list = []  # U集，即全部数据
+    Label_list = []  # L集
+
     """
     预处理 返回的样本数据和标签存储在数据结构Instance中
     每一行的数据格式为稀疏矩阵
@@ -166,8 +208,10 @@ if __name__ == '__main__':
 
     ini_ins_list = randomSamples(datalist)  #初始随机抽取样本
 
+    tempDataArr, tempLabelArr = generateTrainArr(ini_ins_list)  #将instance对象列表生成数据和标签列表
+
     clf = tree.DecisionTreeClassifier()
-    h_1 = clf.fit(ranDataArr, ranLabelArr)
+    h_1 = clf.fit(tempDataArr, tempLabelArr)
     weakClassArr[0] = h_1
 
 
