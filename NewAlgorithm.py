@@ -98,6 +98,7 @@ def computeWeight(h_t, samplelist):
     :param samplelist: 当前采样的数据集
     :return: 弱分类器权重
     """
+    #test
     err = 0
     for x in samplelist :
         if x.label != h_t.predict(x.data):
