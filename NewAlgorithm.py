@@ -11,7 +11,7 @@ from Instance import Instance
 
 
 # new algorithm
-def newAlgorithmTrain(Unlabel_list, weakClassArr, classifierWeightArr, numIt=40):
+def newAlgorithmTrain(Unlabel_list, Label_list ,weakClassArr, classifierWeightArr, numIt=20):
     '''
     :param Unlabel_list: 全部数据
     :param numIt: 轮数
@@ -22,9 +22,10 @@ def newAlgorithmTrain(Unlabel_list, weakClassArr, classifierWeightArr, numIt=40)
         #find the weight for h_t
         Unlabel_list = computeInstanceWeight(Unlabel_list, weakClassArr, classifierWeightArr) #计算样本权重
 
-        sampleBasedQx(dataArr,) #simple and label k instances from U
+        numSample = 5
+        sample_list = sampleBasedQx(Label_list, Unlabel_list, numSample) #simple and label k instances from U
 
-        classifierWeightArr[t] = computeWeight()#evaluate h_t using importance sampling...
+        classifierWeightArr[t] = computeWeight(weakClassArr[t], sample_list)#evaluate h_t using importance sampling...
 
         #let w_t be the weight of h_t
 
@@ -202,7 +203,10 @@ if __name__ == '__main__':
 
     clf = tree.DecisionTreeClassifier()
     h_1 = clf.fit(tempDataArr, tempLabelArr)
-    weakClassArr[0] = h_1
+    weakClassArr[0] = h_1 #初始弱分类器
+    #初始弱分类器权重还没有确定
+
+    newAlgorithmTrain(Unlabel_list, Label_list ,weakClassArr, classifierWeightArr)
 
 
 
