@@ -84,31 +84,24 @@ def sampleBasedQx(dataArr, entropy, labelArr,  numSample):
     return k_instances
 
 #计算q(x)
-# def computeQx(dataArr):
-#     for index, item in enumerate(dataArr):
-#         prediction = H_{t-1}.predict_proba(item)  #x分类正负类的概率 prediction为[[0., 1.]]
-#         #计算熵
-#         entropy[index] = -prediction[0][0]*math.log(prediction[0][0])-prediction[0][1]*math.log(prediction[0][1])
-#     return entropy
+def computeQx(dataArr):
+    for index, item in enumerate(dataArr):
+        prediction = H_{t-1}.predict_proba(item)  #x分类正负类的概率 prediction为[[0., 1.]]
+        #计算熵
+        entropy[index] = -prediction[0][0]*math.log(prediction[0][0])-prediction[0][1]*math.log(prediction[0][1])
+    return entropy
 
 #计算弱分类器权重
-def computeWeight(h_t, sampleArr, sampleLabelArr, instanceWeightArr, Qx):
+def computeWeight(h_t, samplelist):
     """
     :param h_t: 当前弱分类器
-    :param sampleArr: 当前采样数据集L
-    :param sampleLabelArr: 当前采样数据集L的标签
-    :param instanceWeightArr: 当前已有的L集合的样本权重
-    :param Qx: entropy of H_{t-1}(x)，Qx这里针对于整个enlargedLArr，Qx是个数组
+    :param samplelist: 当前采样的数据集
     :return: 弱分类器权重
     """
     err = 0
-    m = shape(sampleArr)[0]
-    if m != shape(sampleLabelArr[0]) :
-        print ("Array size mismatch")
-    #instanceWeightArr = ones((m, 1)) / m  # 数据集L权重初始化为1/m
-    for index, x in enumerate(sampleArr) :
-        if sampleLabelArr[index] != h_t.predict(x):
-            err = err + instanceWeightArr[index] * Qx[index] #这里要使sampleArr和instanceWeightArr一样大才可以
+    for x in samplelist :
+        if x.label != h_t.predict(x.data):
+            err = err + 1/x.weight
 
     weight = math.log((1.0-err)/err)
     return weight #返回该弱分类器的权重
@@ -160,7 +153,7 @@ if __name__ == '__main__':
     datalist = []
     dataArr, labelArr = preTreatment()  #所有数据 以及标签
 
-    for i in range(len(labelArr)):
+    for i in range(labelArr.len()):
         ins = Instance(dataArr[i], labelArr[i])
         datalist.append(ins)
 
