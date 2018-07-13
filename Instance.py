@@ -11,6 +11,7 @@ class Instance(object):
         self.label = label
         self.data = data
         self.weight = None
+        self.entropy = None
 
     def get_label(self):
         return self.label
@@ -20,3 +21,4 @@ class Instance(object):
 
     def get_weight(self):
         return self.weight
+

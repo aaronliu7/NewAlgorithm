@@ -4,6 +4,7 @@ from sklearn import tree
 from numpy import *
 import math
 from sklearn.datasets import load_files
+from sklearn.ensemble import AdaBoostClassifier
 import re
 from sklearn.feature_extraction.text import TfidfVectorizer
 from Instance import Instance
@@ -37,51 +38,46 @@ def newAlgorithmTrain(Unlabel_list, weakClassArr, classifierWeightArr, numIt=40)
 #随机抽取样本  dataArr为所有样本数组
 def randomSamples(datalist):
     """
-
     :param datalist: 数据及其标签
     :return:
     """
-    len = datalist.len()
-    indexList = range(len)
+    l = len(datalist)
+    indexList = range(l)
     randomIndex = random.sample(indexList, 10)
     sample_ins_list = []
     for i in range(randomIndex):
         sample_ins_list.append(datalist[i])
 
-    #将抽取的样本从U集中删除，添加进L集中
-    # LArr = list(set(dataArr).difference(set(ranDataArr)))
-
     return sample_ins_list
 
 #根据q(x)采样和标记样本
-def sampleBasedQx(dataArr, entropy, labelArr,  numSample):
+def sampleBasedQx(Label_list, Unlabel_list, numSample):
     """
-    :param dataArr: U集数组
-    :param entropy: U集中x的熵
-    :param labelArr: 标签
-    :param numSample: 采样数量
-    :return:
+    :param numSample: 需要采样的个数
+    :return: sample_list
     """
-    #simple and label k instances from U
-    #将抽取的样本从U集中删除，添加进L集中
-    total = sum(entropy)  # 权重求和
+
+    sample_list = []
+    total = 0.0
+    for ins in Unlabel_list:
+        total += ins.weight
     ra = []
     for i in range(numSample):
         ra.append(random.uniform(0, total))  # 在0与权重和之前获取一个随机数
 
     curr_sum = 0
-    ret = None
-    keys = dataArr.keys()
+    keys = Unlabel_list.keys()
 
     for rw in ra:
         for k in keys:
-            curr_sum += entropy[k]  # 在遍历中，累加当前权重值
+            curr_sum += Unlabel_list[k].weight  # 在遍历中，累加当前权重值
             if rw <= curr_sum:  # 当随机数<=当前权重和时，返回权重key
-                ret.append(k)
-                break
+                sample_list.append(Unlabel_list[k])
+                del Unlabel_list[k]
+                Label_list.append(Unlabel_list[k])
+                continue
 
-    #TODO 更新数据集
-    return k_instances
+    return sample_list
 
 # 计算样本权重
 def computeInstanceWeight(Unlabel_list, weakClassArr, classifierWeightArr):
@@ -194,12 +190,13 @@ if __name__ == '__main__':
 
     datalist = []
     dataArr, labelArr = preTreatment()  #所有数据 以及标签
-
     for i in range(len(labelArr)):
         ins = Instance(dataArr[i], labelArr[i])
         datalist.append(ins)
 
     ini_ins_list = randomSamples(datalist)  #初始随机抽取样本
+    Label_list = ini_ins_list
+    Unlabel_list =  list(set(datalist).difference(set(Label_list)))
 
     tempDataArr, tempLabelArr = generateTrainArr(ini_ins_list)  #将instance对象列表生成数据和标签列表
 
