@@ -52,6 +52,12 @@ def newAlgorithmTrain(dataArr, classLabels,numIt=40):
 
 #随机抽取样本  dataArr为所有样本数组
 def randomSamples(dataArr, labelArr):
+    len = labelArr.len()
+    indexList = range(len)
+    randomIndex = random.sample(indexList,10)
+    for i in randomIndex:
+        ranDataArr.apppend(dataArr[i])
+        ranDataArr.apppend(labelArr)
     return ranDataArr, ranLabelArr
 
 #根据q(x)采样和标记样本
@@ -87,7 +93,7 @@ def computeWeight(h_t, enlargedLArr, enlargedLabelArr, instanceWeightArr, Qx):
     err = 0
     m = shape(enlargedLArr)[0]
     if m != shape(enlargedLabelArr[0]) :
-        print "Array size mismatch"
+        print("Array size mismatch")
     #instanceWeightArr = ones((m, 1)) / m  # 数据集L权重初始化为1/m
     for index, x in enumerate(enlargedLArr) :
         if enlargedLabelArr[index] != h_t.predict(x):
