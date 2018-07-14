@@ -1,10 +1,9 @@
 #!/usr/bin/env python
 # _*_ coding:utf-8 _*_
 from sklearn import tree
-from numpy import *
 import math
+import random
 from sklearn.datasets import load_files
-from sklearn.ensemble import AdaBoostClassifier
 import re
 from sklearn.feature_extraction.text import TfidfVectorizer
 from Instance import Instance
@@ -43,10 +42,10 @@ def randomSamples(datalist):
     :return:
     """
     l = len(datalist)
-    indexList = range(l)
+    indexList = list(range(l))
     randomIndex = random.sample(indexList, 10)
     sample_ins_list = []
-    for i in range(randomIndex):
+    for i in randomIndex:
         sample_ins_list.append(datalist[i])
 
     return sample_ins_list
@@ -82,6 +81,7 @@ def sampleBasedQx(Label_list, Unlabel_list, numSample):
 
 # 计算样本权重
 def computeInstanceWeight(Unlabel_list, weakClassArr, classifierWeightArr):
+
     weightOfAll = 0 #所有样本的权重，用于归一化
     for index, instance in enumerate(Unlabel_list):
         probaOf0, probaOf1 = generateHt_1x(instance,weakClassArr, classifierWeightArr)  #H_{t-1}(x)
@@ -165,13 +165,13 @@ def preTreatment():
     tf = TfidfVectorizer(min_df=1, analyzer='word', stop_words='english', strip_accents='ascii')
     X_train_tfidf = tf.fit_transform(data)
     # feature_names = tf.get_feature_names()
-    return X_train_tfidf, train_data.target
+    return X_train_tfidf.toarray(), train_data.target
 
 #根据instance对象列表分成数据列表和标记列表
 def generateTrainArr(instanceArr):
     tempDataArr = []
     tempLabelArr = []
-    for instance in instanceArr:
+    for i, instance in enumerate(instanceArr):
         tempDataArr.append(instance.data)
         tempLabelArr.append(instance.label)
     return tempDataArr, tempLabelArr
@@ -200,10 +200,11 @@ if __name__ == '__main__':
     Unlabel_list =  list(set(datalist).difference(set(Label_list)))
 
     tempDataArr, tempLabelArr = generateTrainArr(ini_ins_list)  #将instance对象列表生成数据和标签列表
+    print(type(tempDataArr[1]))
 
     clf = tree.DecisionTreeClassifier()
     h_1 = clf.fit(tempDataArr, tempLabelArr)
-    weakClassArr[0] = h_1 #初始弱分类器
+    weakClassArr.append(h_1)  #初始弱分类器
     #初始弱分类器权重还没有确定
 
     newAlgorithmTrain(Unlabel_list, Label_list ,weakClassArr, classifierWeightArr)
