@@ -19,12 +19,12 @@ def newAlgorithmTrain(Unlabel_list, Label_list ,weakClassArr, classifierWeightAr
     #T轮训练
     for t in range(numIt):
         #find the weight for h_t
-        Unlabel_list = computeInstanceWeight(Unlabel_list, weakClassArr, classifierWeightArr) #计算样本权重
+        Unlabel_list = computeInstanceWeight(Unlabel_list, weakClassArr, classifierWeightArr)    #  计算样本权重
 
         numSample = 5
         sample_list = sampleBasedQx(Label_list, Unlabel_list, numSample) #simple and label k instances from U
 
-        classifierWeightArr[t] = computeWeight(weakClassArr[t], sample_list)#evaluate h_t using importance sampling...
+        classifierWeightArr.append(computeWeight(weakClassArr[t], sample_list))  #evaluate h_t using importance sampling...
 
         #let w_t be the weight of h_t
 
@@ -33,7 +33,10 @@ def newAlgorithmTrain(Unlabel_list, Label_list ,weakClassArr, classifierWeightAr
         #train the next weak classifier
         #add the sample to L
         #train the next weak classifier h_{t+1} using the enlarged L and go to {*}
-        weakClassArr[t+1] = trainNextClf(Label_list)
+
+        lArr, classLabelsOfL = generateTrainArr(Label_list)
+
+        weakClassArr.append(trainNextClf(lArr, classLabelsOfL))
 
 
 #  随机抽取样本  dataArr为所有样本数组
@@ -66,7 +69,7 @@ def sampleBasedQx(Label_list, Unlabel_list, numSample):
     ra = []
     for i in range(numSample):
         ra.append(random.uniform(0, total))  # 在0与权重和之前获取一个随机数
-
+    # print(total)
     curr_sum = 0
     l = len(Unlabel_list)
 
@@ -86,11 +89,14 @@ def sampleBasedQx(Label_list, Unlabel_list, numSample):
 # 计算样本权重
 def computeInstanceWeight(Unlabel_list, weakClassArr, classifierWeightArr):
 
-    weightOfAll = 0 #所有样本的权重，用于归一化
+    #  所有样本的权重，用于归一化
+    weightOfAll = 0
     for index, instance in enumerate(Unlabel_list):
-        probaOf0, probaOf1 = generateHt_1x(instance, weakClassArr, classifierWeightArr)  #H_{t-1}(x)
-        probaOf0 = probaOf0/(probaOf0 + probaOf1)
-        probaOf1 = probaOf1/(probaOf0 + probaOf1)
+        #  H_{t-1}(x)
+        probaOf0, probaOf1 = generateHt_1x(instance, weakClassArr, classifierWeightArr)
+        # probaOf0 = probaOf0/(probaOf0 + probaOf1)
+        # probaOf1 = probaOf1/(probaOf0 + probaOf1)
+
         #计算熵
         # print('begin:%f,%f' % (probaOf0, probaOf1))
         if probaOf0 == 0.0:
@@ -104,7 +110,7 @@ def computeInstanceWeight(Unlabel_list, weakClassArr, classifierWeightArr):
         # print('after:%f,%f' % (probaOf0, probaOf1))
         instance.weight = -probaOf0*math.log(probaOf0)-probaOf1*math.log(probaOf1)
         weightOfAll += instance.weight
-    #归一化
+    #  归一化
     for instance in Unlabel_list:
         instance.weight = instance.weight/weightOfAll
 
@@ -128,8 +134,10 @@ def generateHt_1x(instance, weakClassArr, classifierWeightArr):
     else:
         for i in range(len(weakClassArr)):
             data = []
+            print(classifierWeightArr[i])
             data.append(instance.data)
-            prediction = weakClassArr[i].predict_proba(data) #  x分类正负类的概率 prediction为[[0., 1.]]
+            #  x分类正负类的概率 prediction为[[0., 1.]]
+            prediction = weakClassArr[i].predict_proba(data)
             probaOf0 += prediction[0][0]*classifierWeightArr[i]
             probaOf1 += prediction[0][1]*classifierWeightArr[i]
         return probaOf0, probaOf1
@@ -227,7 +235,7 @@ if __name__ == '__main__':
 
     ini_ins_list = randomSamples(datalist)  #初始随机抽取样本
     Label_list = ini_ins_list
-    Unlabel_list =  list(set(datalist).difference(set(Label_list)))
+    Unlabel_list = list(set(datalist).difference(set(Label_list)))
 
     tempDataArr, tempLabelArr = generateTrainArr(ini_ins_list)  #将instance对象列表生成数据和标签列表
     clf = tree.DecisionTreeClassifier()
@@ -236,9 +244,6 @@ if __name__ == '__main__':
     classifierWeightArr.append(1.0) #初始弱分类器权重赋初始值
 
     newAlgorithmTrain(Unlabel_list, Label_list ,weakClassArr, classifierWeightArr)
-
-
-#哈哈哈
 
 
 
