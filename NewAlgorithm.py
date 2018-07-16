@@ -21,7 +21,7 @@ def newAlgorithmTrain(Unlabel_list, Label_list ,weakClassArr, classifierWeightAr
         #find the weight for h_t
         Unlabel_list = computeInstanceWeight(Unlabel_list, weakClassArr, classifierWeightArr)    #  计算样本权重
 
-        numSample = 5
+        numSample = 20
         sample_list = sampleBasedQx(Label_list, Unlabel_list, numSample) #simple and label k instances from U
 
         classifierWeightArr.append(computeWeight(weakClassArr[t], sample_list))  #evaluate h_t using importance sampling...
@@ -134,7 +134,6 @@ def generateHt_1x(instance, weakClassArr, classifierWeightArr):
     else:
         for i in range(len(weakClassArr)):
             data = []
-            print(classifierWeightArr[i])
             data.append(instance.data)
             #  x分类正负类的概率 prediction为[[0., 1.]]
             prediction = weakClassArr[i].predict_proba(data)
@@ -160,8 +159,11 @@ def computeWeight(h_t, samplelist):
         if x.label != h_t.predict(data):
             err = err + 1/x.weight
     err /= total
+    #  TODO 0 和 >0.5 时候的处理
+    print("error:", err)
     weight = math.log((1.0-err)/err)
     #  返回该弱分类器的权重
+    print("weight:", weight)
     return weight
 
 
