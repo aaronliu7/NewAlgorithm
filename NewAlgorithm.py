@@ -35,6 +35,7 @@ def newAlgorithmTrain(Unlabel_list, Label_list ,weakClassArr, classifierWeightAr
         #train the next weak classifier h_{t+1} using the enlarged L and go to {*}
         weakClassArr[t+1] = trainNextClf(Label_list)
 
+
 #随机抽取样本  dataArr为所有样本数组
 def randomSamples(datalist):
     """
@@ -49,6 +50,7 @@ def randomSamples(datalist):
         sample_ins_list.append(datalist[i])
 
     return sample_ins_list
+
 
 #根据q(x)采样和标记样本
 def sampleBasedQx(Label_list, Unlabel_list, numSample):
@@ -79,6 +81,7 @@ def sampleBasedQx(Label_list, Unlabel_list, numSample):
 
     return sample_list
 
+
 # 计算样本权重
 def computeInstanceWeight(Unlabel_list, weakClassArr, classifierWeightArr):
 
@@ -93,6 +96,7 @@ def computeInstanceWeight(Unlabel_list, weakClassArr, classifierWeightArr):
         instance.weight = instance.weight/weightOfAll
 
     return Unlabel_list
+
 
 #Generate H_{t-1}(x) for each x in U
 def generateHt_1x(instance, weakClassArr, classifierWeightArr):
@@ -115,6 +119,7 @@ def generateHt_1x(instance, weakClassArr, classifierWeightArr):
             probaOf1 += prediction[0][1]*classifierWeightArr[i]
         return probaOf0, probaOf1
 
+
 #计算弱分类器权重
 def computeWeight(h_t, samplelist):
     """
@@ -130,6 +135,7 @@ def computeWeight(h_t, samplelist):
     weight = math.log((1.0-err)/err)
     return weight #返回该弱分类器的权重
 
+
 #训练下一个弱分类器
 def trainNextClf(lArr, classLabelsOfL):
     '''
@@ -142,6 +148,7 @@ def trainNextClf(lArr, classLabelsOfL):
     clf = tree.DecisionTreeClassifier()
     h_next = clf.fit(lArr, classLabelsOfL)
     return h_next
+
 
 #数据预处理
 def preTreatment():
@@ -167,6 +174,7 @@ def preTreatment():
     # feature_names = tf.get_feature_names()
     return X_train_tfidf.toarray(), train_data.target
 
+
 #根据instance对象列表分成数据列表和标记列表
 def generateTrainArr(instanceArr):
     tempDataArr = []
@@ -175,6 +183,7 @@ def generateTrainArr(instanceArr):
         tempDataArr.append(instance.data)
         tempLabelArr.append(instance.label)
     return tempDataArr, tempLabelArr
+
 
 if __name__ == '__main__':
 
