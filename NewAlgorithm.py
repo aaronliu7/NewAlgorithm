@@ -205,7 +205,7 @@ if __name__ == '__main__':
     clf = tree.DecisionTreeClassifier()
     h_1 = clf.fit(tempDataArr, tempLabelArr)
     weakClassArr.append(h_1)  #初始弱分类器
-    classifierWeightArr[0] = 1.0 #初始弱分类器权重赋初始值
+    classifierWeightArr.append(1.0) #初始弱分类器权重赋初始值
 
     newAlgorithmTrain(Unlabel_list, Label_list ,weakClassArr, classifierWeightArr)
 
