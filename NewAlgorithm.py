@@ -141,12 +141,18 @@ def computeWeight(h_t, samplelist):
     :return: 弱分类器权重
     """
     err = 0
-    for x in samplelist :
-        if x.label != h_t.predict(x.data):
+    #  所有1/q(x)总和
+    total = 0
+    for x in samplelist:
+        data = []
+        data.append(x.data)
+        total += 1/x.weight
+        if x.label != h_t.predict(data):
             err = err + 1/x.weight
-
+    err /= total
     weight = math.log((1.0-err)/err)
-    return weight #返回该弱分类器的权重
+    #  返回该弱分类器的权重
+    return weight
 
 
 #  训练下一个弱分类器
