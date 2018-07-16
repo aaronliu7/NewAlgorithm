@@ -160,7 +160,11 @@ def computeWeight(h_t, samplelist):
         if x.label != h_t.predict(data):
             err = err + 1/x.weight
     err /= total
-    weight = math.log((1.0-err)/err)
+    if err == 0 | err > 0.5 :
+        return -1
+    else :
+        weight = math.log((1.0 - err) / err)
+
     #  返回该弱分类器的权重
     return weight
 
