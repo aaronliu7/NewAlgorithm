@@ -24,7 +24,11 @@ def newAlgorithmTrain(Unlabel_list, Label_list ,weakClassArr, classifierWeightAr
         numSample = 20
         sample_list = sampleBasedQx(Label_list, Unlabel_list, numSample) #simple and label k instances from U
 
-        classifierWeightArr.append(computeWeight(weakClassArr[t], sample_list))  #evaluate h_t using importance sampling...
+        weight = computeWeight(weakClassArr[t], sample_list)
+        if weight == -1:
+            print("OVER")
+            break
+        classifierWeightArr.append(weight)  #evaluate h_t using importance sampling...
 
         #let w_t be the weight of h_t
 
@@ -159,7 +163,8 @@ def computeWeight(h_t, samplelist):
         if x.label != h_t.predict(data):
             err = err + 1/x.weight
     err /= total
-    if err == 0 | err > 0.5:
+    print("err", err)
+    if err == 0.0 or err > 0.5:
         return -1
     else:
         weight = math.log((1.0 - err) / err)
