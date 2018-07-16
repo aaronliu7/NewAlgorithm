@@ -36,7 +36,7 @@ def newAlgorithmTrain(Unlabel_list, Label_list ,weakClassArr, classifierWeightAr
         weakClassArr[t+1] = trainNextClf(Label_list)
 
 
-#随机抽取样本  dataArr为所有样本数组
+#  随机抽取样本  dataArr为所有样本数组
 def randomSamples(datalist):
     """
     :param datalist: 数据及其标签
@@ -52,7 +52,7 @@ def randomSamples(datalist):
     return sample_ins_list
 
 
-#根据q(x)采样和标记样本
+#  根据q(x)采样和标记样本
 def sampleBasedQx(Label_list, Unlabel_list, numSample):
     """
     :param numSample: 需要采样的个数
@@ -87,7 +87,7 @@ def computeInstanceWeight(Unlabel_list, weakClassArr, classifierWeightArr):
 
     weightOfAll = 0 #所有样本的权重，用于归一化
     for index, instance in enumerate(Unlabel_list):
-        probaOf0, probaOf1 = generateHt_1x(instance,weakClassArr, classifierWeightArr)  #H_{t-1}(x)
+        probaOf0, probaOf1 = generateHt_1x(instance, weakClassArr, classifierWeightArr)  #H_{t-1}(x)
         #计算熵
         instance.weight = -probaOf0*math.log(probaOf0)-probaOf1*math.log(probaOf1)
         weightOfAll += instance.weight
@@ -98,7 +98,7 @@ def computeInstanceWeight(Unlabel_list, weakClassArr, classifierWeightArr):
     return Unlabel_list
 
 
-#Generate H_{t-1}(x) for each x in U
+#  Generate H_{t-1}(x) for each x in U
 def generateHt_1x(instance, weakClassArr, classifierWeightArr):
     '''
     :param instance: 样本x
@@ -114,13 +114,15 @@ def generateHt_1x(instance, weakClassArr, classifierWeightArr):
         print('!!!!!!!!!!弱分类器个数与其权重个数不对应!!!!!!!!!!!!!')
     else:
         for i in range(len(weakClassArr)):
-            prediction = weakClassArr[i].predict_proba(instance) #x分类正负类的概率 prediction为[[0., 1.]]
+            data = []
+            data.append(instance.data)
+            prediction = weakClassArr[i].predict_proba(data) #  x分类正负类的概率 prediction为[[0., 1.]]
             probaOf0 += prediction[0][0]*classifierWeightArr[i]
             probaOf1 += prediction[0][1]*classifierWeightArr[i]
         return probaOf0, probaOf1
 
 
-#计算弱分类器权重
+#  计算弱分类器权重
 def computeWeight(h_t, samplelist):
     """
     :param h_t: 当前弱分类器
@@ -136,7 +138,7 @@ def computeWeight(h_t, samplelist):
     return weight #返回该弱分类器的权重
 
 
-#训练下一个弱分类器
+#  训练下一个弱分类器
 def trainNextClf(lArr, classLabelsOfL):
     '''
 
@@ -150,7 +152,7 @@ def trainNextClf(lArr, classLabelsOfL):
     return h_next
 
 
-#数据预处理
+#  数据预处理
 def preTreatment():
     # 选取参与分析的文本类别
     categories = ['baseball', 'hockey']
@@ -175,7 +177,7 @@ def preTreatment():
     return X_train_tfidf.toarray(), train_data.target
 
 
-#根据instance对象列表分成数据列表和标记列表
+#  根据instance对象列表分成数据列表和标记列表
 def generateTrainArr(instanceArr):
     tempDataArr = []
     tempLabelArr = []
