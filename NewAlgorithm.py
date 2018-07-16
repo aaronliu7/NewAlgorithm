@@ -68,16 +68,17 @@ def sampleBasedQx(Label_list, Unlabel_list, numSample):
         ra.append(random.uniform(0, total))  # 在0与权重和之前获取一个随机数
 
     curr_sum = 0
-    keys = Unlabel_list.keys()
+    l = len(Unlabel_list)
 
+    # print(len(ra))
     for rw in ra:
-        for k in keys:
+        for k in range(l):
             curr_sum += Unlabel_list[k].weight  # 在遍历中，累加当前权重值
             if rw <= curr_sum:  # 当随机数<=当前权重和时，返回权重key
                 sample_list.append(Unlabel_list[k])
                 del Unlabel_list[k]
                 Label_list.append(Unlabel_list[k])
-                continue
+                break
 
     return sample_list
 
@@ -221,8 +222,6 @@ if __name__ == '__main__':
     Unlabel_list =  list(set(datalist).difference(set(Label_list)))
 
     tempDataArr, tempLabelArr = generateTrainArr(ini_ins_list)  #将instance对象列表生成数据和标签列表
-    print(type(tempDataArr[1]))
-
     clf = tree.DecisionTreeClassifier()
     h_1 = clf.fit(tempDataArr, tempLabelArr)
     weakClassArr.append(h_1)  #初始弱分类器
