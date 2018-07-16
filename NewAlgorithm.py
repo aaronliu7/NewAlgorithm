@@ -89,6 +89,8 @@ def computeInstanceWeight(Unlabel_list, weakClassArr, classifierWeightArr):
     weightOfAll = 0 #所有样本的权重，用于归一化
     for index, instance in enumerate(Unlabel_list):
         probaOf0, probaOf1 = generateHt_1x(instance, weakClassArr, classifierWeightArr)  #H_{t-1}(x)
+        probaOf0 = probaOf0/(probaOf0 + probaOf1)
+        probaOf1 = probaOf1/(probaOf0 + probaOf1)
         #计算熵
         # print('begin:%f,%f' % (probaOf0, probaOf1))
         if probaOf0 == 0.0:
